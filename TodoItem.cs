@@ -1,4 +1,4 @@
-﻿namespace ExtenseTracker
+﻿namespace ExpenseTracker
 {
     public class TodoItem
     {
