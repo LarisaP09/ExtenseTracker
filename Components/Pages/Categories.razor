@@ -1,22 +1,59 @@
 ﻿@page "/categories"
 @using ExpenseTracker.Data.Models
+@using ExpenseTracker.Services
+@inject CategoryService Service
+@rendermode InteractiveServer
 
 <h3>Categories</h3>
-<ul>
-    @foreach (var cat in categories)
-    {
-        <li> @cat.Name</li>
+@if (categories == null){
+    <p><em>Loading...</em></p>
+}
+else if (categories.Count == 0)
+{
+    <p><em>No categories availabel</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var category in categories)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                @category.Name
+                <button @onclick="() => DeleteCategory(category)" class="btn btn-danger btn-sm">Delete</button>
+            </li>
+        }
+    </ul>
+}
 
-    }
-</ul>
+<h3>Add new category</h3>
+<form @onsubmit="HandleAddCategory" class="d-flex align-items-center justify-content-between">
+    <div class="form-group mb-2 mr-2">
+        <input name="cname" type="text" class="form-control" @bind="newCategory.Name" placeholder="Category name" required />
+    </div>
+    <button class="btn btn-primary mb-2" type="submit">Add Category</button>
+</form>
 
 @code {
-    List<Category> categories = new List<Category>
-    {
-        new Category{ Id = 1, Name = "House" },
-        new Category{ Id = 2, Name = "Food" },
-        new Category { Id = 3, Name = "Entertainment" }
-    };
-    string newCategoryName = "";
+    List<Category> categories = new List<Category>();
+    private Category newCategory = new Category();
 
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await Service.GetCategoriesAsync();
+    }
+
+    private async Task HandleAddCategory()
+    {
+        await Service.AddCategoryAsync(newCategory);
+        categories = await Service.GetCategoriesAsync();
+        newCategory = new Category();
+        StateHasChanged();
+    }
+
+    private async Task DeleteCategory(Category category)
+    {
+        await Service.DeleteCategoryAsyync(category);
+        categories = await Service.GetCategoriesAsync();
+        StateHasChanged();
+    } 
 }
