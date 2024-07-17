@@ -1,10 +1,9 @@
 ﻿using ExpenseTracker.Data;
 using ExpenseTracker.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ExpenseTracker.Components.Pages;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ExpenseTracker.Services
 {
@@ -29,6 +28,13 @@ namespace ExpenseTracker.Services
                                  .ToListAsync();
         }
 
+        public async Task<Expense> GetExpenseByIdAsync(int expenseId)
+        {
+            return await _context.Expenses
+                                 .Include(e => e.Category)
+                                 .FirstOrDefaultAsync(e => e.Id == expenseId);
+        }
+
         public async Task AddExpenseAsync(Expense expense)
         {
             _context.Expenses.Add(expense);
@@ -43,14 +49,14 @@ namespace ExpenseTracker.Services
 
         public async Task UpdateExpenseAsync(Expense expense)
         {
-            var existExpense = await _context.Expenses.FindAsync(expense.Id);
-            if (existExpense != null) 
+            var existingExpense = await _context.Expenses.FindAsync(expense.Id);
+            if (existingExpense != null)
             {
-                existExpense.Title = expense.Title;
-                existExpense.Date = expense.Date;
-                existExpense.Amount = expense.Amount;
-                existExpense.Planned = expense.Planned;
-                existExpense.CategoryId = expense.CategoryId;
+                existingExpense.Title = expense.Title;
+                existingExpense.Date = expense.Date;
+                existingExpense.Amount = expense.Amount;
+                existingExpense.Planned = expense.Planned;
+                existingExpense.CategoryId = expense.CategoryId;
 
                 await _context.SaveChangesAsync();
             }
@@ -58,6 +64,14 @@ namespace ExpenseTracker.Services
             {
                 throw new ArgumentException($"Expense with ID {expense.Id} not found.");
             }
+        }
+
+        public async Task<List<Expense>> GetExpensesByCategoryAsync(int categoryId)
+        {
+            return await _context.Expenses
+                                 .Where(e => e.CategoryId == categoryId)
+                                 .Include(e => e.Category)
+                                 .ToListAsync();
         }
     }
 }

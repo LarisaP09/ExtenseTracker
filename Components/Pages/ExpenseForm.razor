@@ -1,0 +1,74 @@
+﻿@using ExpenseTracker.Data.Models
+@using ExpenseTracker.Services
+@using Microsoft.AspNetCore.Components
+@inject CategoryService Service
+
+<form @onsubmit="HandleSubmit" class="d-flex flex-column">
+    <div class="form-group mb-2">
+        <label for="title">Title</label>
+        <input id="title" name="title" type="text" class="form-control" @bind="Expense.Title" required />
+    </div>
+    <div class="form-group mb-2">
+        <label for="date">Date</label>
+        <input id="date" name="date" type="date" class="form-control" @bind="Expense.Date" required />
+    </div>
+    <div class="form-group mb-2">
+        <label for="amount">Amount</label>
+        <input id="amount" name="amount" type="number" step="0.01" class="form-control" @bind="Expense.Amount" required />
+    </div>
+    <div class="form-group mb-2">
+        <label for="planned">Planned</label>
+        <input id="planned" name="planned" type="checkbox" class="form-check-input" @bind="Expense.Planned" />
+    </div>
+    <div class="form-group mb-2">
+        <label for="category">Category</label>
+        <select id="category" name="category" class="form-control" @bind="Expense.CategoryId" required>
+            <option value="">Select a category</option>
+            @foreach (var category in Categories)
+            {
+                <option value="@category.Id">@category.Name</option>
+            }
+        </select>
+    </div>
+    <button class="btn btn-primary mt-2" type="submit">@ButtonText</button>
+</form>
+
+@code {
+    [Parameter]
+    public Expense Expense { get; set; } = new Expense();
+
+    [Parameter]
+    public List<Category> Categories { get; set; } = new List<Category>();
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter]
+    public string ButtonText { get; set; } = "Submit";
+
+    // Proprietate pentru a determina dacă se adaugă sau se editează
+    [Parameter]
+    public string FormMode { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        if (FormMode == "add")
+        {
+            await AddExpense();
+        }
+        else if (FormMode == "edit")
+        {
+            await EditExpense();
+        }
+    }
+
+    private async Task AddExpense()
+    {
+        await OnValidSubmit.InvokeAsync(null);
+    }
+
+    private async Task EditExpense()
+    {
+        await OnValidSubmit.InvokeAsync(null);
+    }
+}

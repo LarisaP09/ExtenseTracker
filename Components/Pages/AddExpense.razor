@@ -1,0 +1,27 @@
+﻿@page "/expenses/new"
+@using ExpenseTracker.Data.Models
+@using ExpenseTracker.Services
+@inject CategoryService Service
+@inject ExpenseService ExpenseService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Add Expense</h3>
+
+<ExpenseForm Expense="newExpense" Categories="categories" OnValidSubmit="HandleAddOrUpdateExpense" ButtonText="Add Expense" FormMode="add" />
+
+@code {
+    private List<Category> categories = new List<Category>();
+    private Expense newExpense = new Expense { Date = DateTime.Today };
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await Service.GetCategoriesAsync();
+    }
+
+    private async Task HandleAddOrUpdateExpense()
+    {
+        await ExpenseService.AddExpenseAsync(newExpense);
+        NavigationManager.NavigateTo("/expenses");
+    }
+}

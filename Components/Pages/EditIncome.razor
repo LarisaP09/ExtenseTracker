@@ -1,0 +1,64 @@
+﻿@page "/incomes/edit/{id:int}"
+@using ExpenseTracker.Data.Models
+@using ExpenseTracker.Services
+@using System.ComponentModel
+@using System.Reflection
+@inject NavigationManager NavigationManager
+@inject IncomeService IncomeService
+@rendermode InteractiveServer
+
+<h3>Edit Income</h3>
+@if (newIncome == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <form @onsubmit="HandleSubmit" class="d-flex flex-column">
+        <div class="form-group mb-2">
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" class="form-control" @bind-value="newIncome.Title" />
+        </div>
+
+        <div class="form-group mb-2">
+            <label for="date">Date</label>
+            <input id="date" name="date" type="date" class="form-control" @bind-value="newIncome.Date" />
+        </div>
+
+        <div class="form-group mb-2">
+            <label for="amount">Amount</label>
+            <input id="amount" name="amount" type="number" class="form-control" @bind-value="newIncome.Amount" />
+        </div>
+
+        <div class="form-group mb-2">
+            <label for="type">Income Type</label>
+            <select @bind="newIncome.Type" class="form-control">
+                <option value="">Select a type</option>
+                @foreach (var type in Enum.GetValues(typeof(IncomeType)))
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Save changes</button>
+    </form>
+}
+
+@code {
+    private Income newIncome = new Income();
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        newIncome = await IncomeService.GetIncomeByIdAsync(Id);
+    }
+
+    private async Task HandleSubmit()
+    {
+        await IncomeService.UpdateIncomeAsync(newIncome);
+        NavigationManager.NavigateTo("/incomes");
+    }
+
+}

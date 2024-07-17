@@ -1,0 +1,84 @@
+﻿@page "/incomes"
+@using ExpenseTracker.Data.Models
+@using ExpenseTracker.Services
+@using System.ComponentModel
+@using System.Reflection
+@inject NavigationManager NavigationManager
+@inject IncomeService IncomeService
+@rendermode InteractiveServer
+
+<h3>Income</h3>
+@if (incomes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!incomes.Any())
+{
+    <p>No income records found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var income in incomes)
+            {
+                <tr>
+                    <td>@income.Title</td>
+                    <td>@income.Amount.ToString("0.00")</td>
+                    <td>@income.Date.ToShortDateString()</td>
+                    <td>@income.Type.ToString()</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="() => EditIncome(income.Id)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteIncome(income)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<button class="btn btn-primary mt-2" @onclick="NavigateToAddIncome">Add income</button>
+
+
+
+@code {
+    private List<Income> incomes = new List<Income>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        incomes = await IncomeService.GetIncomeAsync();
+        StateHasChanged();
+    }
+
+    private void NavigateToAddIncome()
+    {
+        NavigationManager.NavigateTo("/income/add");
+    }
+
+    private async Task LoadIncome()
+    {
+        incomes = await IncomeService.GetIncomeAsync();
+        StateHasChanged();
+    }
+
+    private async Task DeleteIncome(Income income)
+    {
+        await IncomeService.DeleteIncomeAsync(income);
+        await LoadIncome(); 
+    }
+
+    private void EditIncome(int incomeId)
+    {
+        NavigationManager.NavigateTo($"/incomes/edit/{incomeId}");
+    }
+}
+
+

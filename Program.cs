@@ -12,6 +12,9 @@ builder.Services.AddRazorComponents()
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<ExpenseService>();
+builder.Services.AddScoped<IncomeService>();
+
 
 
 //configure db context and connection

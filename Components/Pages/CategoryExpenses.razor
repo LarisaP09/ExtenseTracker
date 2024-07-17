@@ -1,0 +1,45 @@
+﻿@page "/expenses/category/{categoryId:int}"
+@using ExpenseTracker.Data.Models
+@using ExpenseTracker.Services
+@inject ExpenseService ExpenseService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Expenses in Category</h3>
+@if (expenses == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (expenses.Count == 0)
+{
+    <p><em>No expenses available in this category</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var expense in expenses)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                @expense.Title - @expense.Amount.ToString("C")
+            </li>
+        }
+    </ul>
+}
+<button @onclick="BackToCategories" class="btn btn-primary mt-3">Back to Categories</button>
+
+@code {
+    [Parameter]
+    public int categoryId { get; set; }
+
+    private List<Expense> expenses;
+
+    protected override async Task OnInitializedAsync()
+    {
+        expenses = await ExpenseService.GetExpensesByCategoryAsync(categoryId);
+    }
+
+    private void BackToCategories()
+    {
+        NavigationManager.NavigateTo("/categories");
+    }
+}

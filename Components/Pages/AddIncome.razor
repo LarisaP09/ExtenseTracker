@@ -1,0 +1,51 @@
+﻿@page "/income/add"
+@using ExpenseTracker.Data.Models
+@using ExpenseTracker.Services
+@using System.ComponentModel
+@using System.Reflection
+@inject NavigationManager NavigationManager
+@inject IncomeService IncomeService
+@rendermode InteractiveServer
+
+<h3>Add income</h3>
+<form @onsubmit="HandleSubmit" class="d-flex flex-column">
+    <div class="form-group mb-2">
+        <label for="title">Title</label>
+        <input id="title" name="title" type="text" class="form-control" @bind-value="newIncome.Title" />
+    </div>
+
+    <div class="form-group mb-2">
+        <label for="date">Date</label>
+        <input id="date" name="date" type="date" class="form-control" @bind-value="newIncome.Date" />
+    </div>
+
+    <div class="form-group mb-2">
+        <label for="amount">Amount</label>
+        <input id="amount" name="amount" type="number" class="form-control" @bind-value="newIncome.Amount" />
+    </div>
+
+    <div class="form-group mb-2">
+        <label for="type">Income Type</label>
+        <select @bind="newIncome.Type" class="form-control">
+            <option value="">Select a type</option>
+            @foreach (var type in Enum.GetValues(typeof(IncomeType)))
+            {
+                <option value="@type">@type</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Add Income</button>
+</form>
+@code {
+    private Income newIncome = new Income();
+    private List<Income> incomes = new List<Income>();
+
+    private async Task HandleSubmit()
+    {
+        await IncomeService.AddIncomeAsync(newIncome);
+        newIncome = new Income();
+        incomes = await IncomeService.GetIncomeAsync();
+
+        NavigationManager.NavigateTo("/incomes");
+    }
+}
