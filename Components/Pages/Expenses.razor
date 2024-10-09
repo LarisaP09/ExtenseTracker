@@ -7,13 +7,22 @@
 
 <h3>Expenses</h3>
 
-@if (expenses == null)
+<div class="mb-3">
+    <label for="filter" class="form-label">Filter</label>
+    <select id="filter" class="form-select" @bind="SelectedFilter" @bind:event="onchange">
+        <option value="All">All</option>
+        <option value="Planned">Planned</option>
+        <option value="Unplanned">Unplanned</option>
+    </select>
+</div>
+
+@if (filteredExpenses == null)
 {
     <p><em>Loading...</em></p>
 }
-else if (!expenses.Any())
+else if (!filteredExpenses.Any())
 {
-    <p>No expenses to display.</p>
+    <p><em>No expenses to display.</em></p>
 }
 else
 {
@@ -29,7 +38,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var expense in expenses)
+            @foreach (var expense in filteredExpenses)
             {
                 <tr>
                     <td>@expense.Title</td>
@@ -50,6 +59,21 @@ else
 
 @code {
     private List<Expense> expenses;
+    private List<Expense> filteredExpenses;
+    private string selectedFilter = "All";
+
+    private string SelectedFilter
+    {
+        get => selectedFilter;
+        set
+        {
+            if (selectedFilter != value)
+            {
+                selectedFilter = value;
+                FilterExpenses();
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,6 +83,26 @@ else
     private async Task LoadExpenses()
     {
         expenses = await ExpenseService.GetExpensesAsync();
+        FilterExpenses();
+    }
+
+    private void FilterExpenses()
+    {
+        if (selectedFilter == "All")
+        {
+            filteredExpenses = expenses;
+        }
+        else if (selectedFilter == "Planned")
+        {
+            filteredExpenses = expenses.Where(e => e.Planned).ToList();
+        }
+        else if (selectedFilter == "Unplanned")
+        {
+            filteredExpenses = expenses.Where(e => !e.Planned).ToList();
+        }
+
+        // Ensure the state is updated
+        StateHasChanged();
     }
 
     private void NavigateToAddExpense()

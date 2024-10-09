@@ -1,6 +1,7 @@
 ﻿using ExpenseTracker.Components.Pages;
 using ExpenseTracker.Data;
 using ExpenseTracker.Data.Models;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,12 @@ namespace ExpenseTracker.Services
         public async Task<Income> GetIncomeByIdAsync(int id)
         {
             return await _context.Incomes.FindAsync(id);
+        }
+
+        public async Task<float> GetTotalIncome(DateTime startdate, DateTime endDate)
+        {
+            return await _context.Incomes.Where(i => i.Date >= startdate && i.Date <= endDate)
+                .SumAsync(i => i.Amount);
         }
     }
 }

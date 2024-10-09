@@ -13,6 +13,7 @@
 else if (expenses.Count == 0)
 {
     <p><em>No expenses available in this category</em></p>
+    <button class="btn btn-outline-primary btn-sm mt-2" @onclick="NavigateToAddExpense">Add expense</button>
 }
 else
 {
@@ -25,6 +26,7 @@ else
         }
     </ul>
 }
+<br />
 <button @onclick="BackToCategories" class="btn btn-primary mt-3">Back to Categories</button>
 
 @code {
@@ -41,5 +43,10 @@ else
     private void BackToCategories()
     {
         NavigationManager.NavigateTo("/categories");
+    }
+
+    private void NavigateToAddExpense()
+    {
+        NavigationManager.NavigateTo("/expenses/new");
     }
 }

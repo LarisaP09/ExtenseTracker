@@ -18,7 +18,7 @@ else
         @foreach (var category in categories)
         {
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="@($"/expenses/category/{category.Id}")">@category.Name</a>
+                <a href="@($"/expenses/category/{category.Id}")"  class="text-decoration-none text-dark">@category.Name</a>
                 <button @onclick="() => DeleteCategory(category)" class="btn btn-danger btn-sm">Delete</button>
             </li>
         }

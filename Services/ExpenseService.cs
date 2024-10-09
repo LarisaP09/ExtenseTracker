@@ -73,5 +73,11 @@ namespace ExpenseTracker.Services
                                  .Include(e => e.Category)
                                  .ToListAsync();
         }
+
+        public async Task<float> GetTotalExpanse(DateTime startdate, DateTime endDate)
+        {
+            return await _context.Expenses.Where(e => e.Date >= startdate && e.Date <= endDate)
+                .SumAsync(e => e.Amount);
+        }
     }
 }

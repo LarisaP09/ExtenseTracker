@@ -8,16 +8,20 @@
 @rendermode InteractiveServer
 
 <h3>Income</h3>
-@if (incomes == null)
-{
-    <p><em>Loading...</em></p>
-}
-else if (!incomes.Any())
-{
-    <p>No income records found.</p>
-}
-else
-{
+
+<div class="form-control d-flex justify-content-between">
+    <div class="mb-3">
+        <label for="startDate" class="form-label">Start Date</label>
+        <input id="startDate" type="date" class="form-control" @bind="startDate" @bind:event="oninput" />
+    </div>
+    <div class="mb-3">
+        <label for="endDate" class="form-label">End Date</label>
+        <input id="endDate" type="date" class="form-control" @bind="endDate" @bind:event="oninput" />
+    </div>
+
+    <button class="btn btn-outline-primary mb-2 mt-2 btn-sm btn-block" @onclick="FilterIncomes">Apply filter</button>
+</div>
+
     <table class="table">
         <thead>
             <tr>
@@ -29,7 +33,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var income in incomes)
+            @foreach (var income in filteredIncomes)
             {
                 <tr>
                     <td>@income.Title</td>
@@ -44,17 +48,38 @@ else
             }
         </tbody>
     </table>
-}
+
 <button class="btn btn-primary mt-2" @onclick="NavigateToAddIncome">Add income</button>
 
 
 
 @code {
     private List<Income> incomes = new List<Income>();
+    private List<Income> filteredIncomes = new List<Income>();
+    private DateTime? startDate;
+    private DateTime? endDate;
 
     protected override async Task OnInitializedAsync()
     {
         incomes = await IncomeService.GetIncomeAsync();
+        StateHasChanged();
+        filteredIncomes = incomes;
+    }
+
+    private void FilterIncomes()
+    {
+        if (startDate.HasValue || endDate.HasValue)
+        {
+            filteredIncomes = incomes.Where(i =>
+                (!startDate.HasValue || i.Date >= startDate.Value) &&
+                (!endDate.HasValue || i.Date <= endDate.Value)
+            ).ToList();
+        }
+        else
+        {
+            filteredIncomes = incomes;
+        }
+
         StateHasChanged();
     }
 
@@ -66,6 +91,7 @@ else
     private async Task LoadIncome()
     {
         incomes = await IncomeService.GetIncomeAsync();
+        filteredIncomes = incomes;
         StateHasChanged();
     }
 

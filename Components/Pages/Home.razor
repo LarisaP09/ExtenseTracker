@@ -1,12 +1,116 @@
 ﻿@page "/"
+@using ExpenseTracker.Data.Models
+@using ExpenseTracker.Services
+@inject IncomeService IncomeService
+@inject ExpenseService ExpenseService
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<Counter IncrementAmount="1" />
+<h1>Expense Tracker</h1>
+<p>Welcome to your new expense tracking app!</p>
 
 
-    
+@if (incomes == null || expenses == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if(!incomes.Any())
+{
+    <p>No income records found.</p>
+}
+else
+{
+    <div class="container ">
+        <div class="col-mb-2 mb-3 container shadow-sm rounded  ">
+            <p class="card-title text-muted">Balance</p>
+            @if (balance > 0)
+            {
+                <p class="card-text text-success fs-3  fw-bold">@balance.ToString("N2") Ron</p>
+            }
+            else if (balance < 0)
+            {
+                <p class="card-text text-danger fs-3">@balance.ToString("N2") Ron</p>
+            }
+
+        </div>
+        <div class="row mb-2">
+            <div class="col-md-6  mb-3 container shadow-sm rounded">
+                <h4 class="card-title fw-bold">Incomes</h4>
+                <p class="card-subtitle mb-2 text-muted">@incomeTimeRange</p>
+                <p class="card-text">@totalIncome.ToString("N2") Ron</p>
+                <p class="card-subtitle mb-2 text-muted">Current Month</p>
+                <p class="card-text">@currentMonthIncome.ToString("N2")</p>
+            </div>
+
+            <div class="col-md-6  mb-3 container shadow-sm rounded">
+                <h4 class="card-title fw-bold">Expenses</h4>
+                <p class="card-subtitle mb-2 text-muted">@expenseTimeRange</p>
+                <p class="card-text">@totalExpenses.ToString("N2") Ron</p>
+                <p class="card-subtitle mb-2 text-muted">Current Month</p>
+                <p class="card-text">@currentMonthExpense.ToString("N2")</p>
+            </div>
+
+            <div class="col-md-6  mb-3 container shadow-sm rounded">
+                <h4 class="card-title fw-bold">Total planned expesnes</h4>
+                <p class="card-text">@plannedExpensesTotal.ToString("N2") Ron</p>
+            </div>
+
+            <div class="col-md-6  mb-3 container shadow-sm rounded">
+                <h4 class="card-title fw-bold">Total unplanned expesnes</h4>
+                <p class="card-text">@unplannedExpensesTotal.ToString("N2")</p>
+            </div>
+        </div>
+    </div>
+
+}
+
+@code{
+    private List<Income> incomes;
+    private List<Expense> expenses;
+
+    private float totalIncome;
+    private float totalExpenses;
+
+    private float currentMonthIncome;
+    private float currentMonthExpense;
+
+    private string incomeTimeRange;
+    private string expenseTimeRange;
+
+    private float plannedExpensesTotal;
+    private float unplannedExpensesTotal;
+    private float balance;
+
+    protected override async Task OnInitializedAsync(){
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        DateTime now = DateTime.UtcNow;
+        DateTime firstDayOfCurrentMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        DateTime firstDayOfNextMonth = firstDayOfCurrentMonth.AddMonths(1);
+        DateTime startDate = new DateTime(2023, 7, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        incomes = await IncomeService.GetIncomeAsync();
+        expenses = await ExpenseService.GetExpensesAsync();
+
+        totalIncome = await IncomeService.GetTotalIncome(startDate, now);
+        totalExpenses = await ExpenseService.GetTotalExpanse(startDate, now);
+        currentMonthExpense = await IncomeService.GetTotalIncome(firstDayOfCurrentMonth, firstDayOfNextMonth);
+        currentMonthIncome = await ExpenseService.GetTotalExpanse(firstDayOfCurrentMonth, firstDayOfNextMonth);
+
+        balance = totalIncome - totalExpenses;
+
+        plannedExpensesTotal = expenses.Where(e => e.Planned).Sum(e => e.Amount);
+        unplannedExpensesTotal = expenses.Where(u => !u.Planned).Sum(u => u.Amount);
+
+        incomeTimeRange = $"{startDate.ToShortDateString()} - {now.ToShortDateString()}";
+        expenseTimeRange = $"{startDate.ToShortDateString()} - {now.ToShortDateString()}";
+
+        StateHasChanged();
+    }
+
+   
+}
